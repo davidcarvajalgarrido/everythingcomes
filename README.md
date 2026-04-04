@@ -38,10 +38,15 @@ Then visit `http://localhost:8080`.
 
 ## Deploy to GitHub Pages
 
-1. Push the files to a GitHub repository.
-2. Go to **Settings → Pages**.
-3. Set **Source** to the `main` branch, root folder (`/`).
-4. Save — the page will be live at `https://<username>.github.io/<repo>/`.
+The repository includes a `.nojekyll` file so GitHub Pages skips Jekyll processing and serves the static files as-is.
+
+1. Push the repository to GitHub (the `main` branch).
+2. Go to **Settings → Pages** in your repository.
+3. Under **Build and deployment**, set **Source** to **Deploy from a branch**.
+4. Choose **Branch: `main`** and folder **`/ (root)`**, then click **Save**.
+5. After a moment the site will be live at `https://<username>.github.io/<repo>/`.
+
+No build step, no configuration files — the repository root is the site root.
 
 ## Design notes
 
