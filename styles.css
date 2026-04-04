@@ -15,9 +15,11 @@
   --phrase-size: clamp(2rem, 5.5vw, 4.8rem);
   --sub-size:    clamp(0.68rem, 1.3vw, 0.875rem);
 
-  /* Transition timing (keep in sync with FADE_DURATION in main.js) */
-  --fade-dur:  800ms;
-  --ease-out:  cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Transition timing (keep in sync with FADE_OUT / FADE_IN in main.js) */
+  --fade-out-dur:  1000ms;  /* exit — slightly quicker so the old phrase doesn't linger too long */
+  --fade-in-dur:   1400ms;  /* entrance — slow, deliberate, the phrase settles into place        */
+  --ease-in:   cubic-bezier(0.4,  0,    1,   1);    /* accelerates away — departure  */
+  --ease-out:  cubic-bezier(0,    0,    0.2, 1);    /* decelerates in   — arrival    */
 }
 
 /* ── Reset ───────────────────────────────────────────────────── */
@@ -99,7 +101,11 @@ body {
 
 /* ── Text container ──────────────────────────────────────────── */
 .hero__text-container {
-  /* Small padding absorbs the 0.35 em vertical shift during transition */
+  /* Fixed full-width centre-align prevents any horizontal shift when
+     a phrase changes length or switches to an RTL script (Arabic, Hebrew). */
+  width: 100%;
+  text-align: center;
+  /* Small vertical padding absorbs the translateY shift during transition */
   overflow: hidden;
   padding: 0.4em 0;
 }
@@ -116,18 +122,22 @@ body {
   opacity: 1;
   transform: translateY(0);
 
-  /* Both opacity and vertical position transition together */
+  /* Fade-in / entrance: slow deceleration — phrase settles gently */
   transition:
-    opacity   var(--fade-dur) var(--ease-out),
-    transform var(--fade-dur) var(--ease-out);
+    opacity   var(--fade-in-dur) var(--ease-out),
+    transform var(--fade-in-dur) var(--ease-out);
 
   will-change: opacity, transform;
 }
 
-/* ① Leaving — fade out and drift upward */
+/* ① Leaving — fade out and drift upward.
+   Override transition so the exit uses a tighter ease-in curve. */
 .hero__phrase.is-out {
   opacity: 0;
-  transform: translateY(-0.35em);
+  transform: translateY(-0.25em);
+  transition:
+    opacity   var(--fade-out-dur) var(--ease-in),
+    transform var(--fade-out-dur) var(--ease-in);
 }
 
 /*
@@ -137,7 +147,7 @@ body {
 */
 .hero__phrase.is-reset {
   opacity: 0;
-  transform: translateY(0.35em);
+  transform: translateY(0.25em);
   transition: none;
 }
 

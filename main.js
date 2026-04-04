@@ -25,11 +25,13 @@ const PHRASES = [
 ];
 
 // How long (ms) each phrase stays fully visible after its fade-in completes.
-const DISPLAY_DURATION = 3200;
+const DISPLAY_DURATION = 4500;
 
-// Duration (ms) of a single fade-out or fade-in step.
-// Keep this in sync with --fade-dur in styles.css.
-const FADE_DURATION = 800;
+// Duration (ms) of the fade-out step (exit).  Keep in sync with --fade-out-dur in styles.css.
+const FADE_OUT = 1000;
+
+// Duration (ms) of the fade-in step (entrance).  Keep in sync with --fade-in-dur in styles.css.
+const FADE_IN = 1400;
 
 // ── Reduced-motion preference ─────────────────────────────────
 const prefersReducedMotion = window.matchMedia(
@@ -47,11 +49,14 @@ let currentIndex = 0;
  * Transition to `phrase`, then fire `onComplete` when fully visible.
  *
  * The sequence:
- *   1. Add `is-out`   → CSS transition: fade out + drift up      (FADE_DURATION ms)
+ *   1. Add `is-out`   → CSS ease-in transition: fade out + drift up      (FADE_OUT ms)
  *   2. Swap text while invisible
  *   3. Add `is-reset` → instant snap to below-centre (transition: none)
- *   4. Remove `is-reset` → CSS transition: fade in + drift up to centre (FADE_DURATION ms)
+ *   4. Remove `is-reset` → CSS ease-out transition: fade in + drift up   (FADE_IN ms)
  *   5. Fire `onComplete`
+ *
+ * Separate durations for out/in make the exit feel crisp and the
+ * entrance feel slow and deliberate — more poetic, less carousel-like.
  */
 function transitionToPhrase(phrase, onComplete) {
   if (prefersReducedMotion) {
@@ -65,7 +70,7 @@ function transitionToPhrase(phrase, onComplete) {
     return;
   }
 
-  // ① Fade out (upward)
+  // ① Fade out (upward, ease-in via CSS)
   phraseEl.classList.add('is-out');
 
   setTimeout(() => {
@@ -83,11 +88,11 @@ function transitionToPhrase(phrase, onComplete) {
     // Force the browser to commit the reset state before removing the class
     void phraseEl.offsetHeight;
 
-    // ④ Remove reset → base transition animates up into place
+    // ④ Remove reset → base ease-out transition animates up into place
     phraseEl.classList.remove('is-reset');
 
-    if (onComplete) setTimeout(onComplete, FADE_DURATION);
-  }, FADE_DURATION);
+    if (onComplete) setTimeout(onComplete, FADE_IN);
+  }, FADE_OUT);
 }
 
 /** Advance to the next phrase and schedule the one after it. */
@@ -98,7 +103,7 @@ function showNextPhrase() {
   });
 }
 
-// Start the rotation after the initial phrase has been on screen
+// Start the rotation after the initial phrase has been on screen long enough to read
 setTimeout(showNextPhrase, DISPLAY_DURATION);
 
 // ─────────────────────────────────────────────────────────────

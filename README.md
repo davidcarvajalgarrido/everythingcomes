@@ -49,7 +49,7 @@ Then visit `http://localhost:8080`.
 |---|---|
 | Background | `#f7f3ee` warm off-white |
 | Typography | Georgia serif, weight 400 |
-| Phrase transition | 800 ms ease-out fade + 0.35 em vertical drift |
+| Phrase transition | 1000 ms ease-in fade-out + 1400 ms ease-out fade-in, 0.25 em vertical drift |
 | Sakura petals | 52 canvas ellipses, `requestAnimationFrame` |
 | Parallax tilt | Atropos.js, 6° max rotation, no shadow/highlight |
 | Accessibility | `aria-live="polite"` on rotating text, `aria-hidden` on canvas |
