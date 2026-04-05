@@ -70,9 +70,9 @@
 
   </div>
 
-  <!-- Ambient audio — no autoplay, no controls; src can be replaced later -->
+  <!-- Ambient audio — no autoplay, no controls -->
   <audio id="ambient-audio" loop preload="none">
-    <!-- <source src="audio/ambient.mp3" type="audio/mpeg" /> -->
+    <source src="audio/sakura.mp3" type="audio/mpeg" />
   </audio>
 
   <!-- ── Main content ─────────────────────────────────────── -->
@@ -121,10 +121,17 @@
 
   <!-- ── Credits ───────────────────────────────────────────── -->
   <footer class="credits" aria-label="Attribution">
-    <span>© <span id="credits-year"></span> David Carvajal Garrido</span><!--
-    Uncomment and update when audio attribution is needed:
-    <span id="credits-audio-attr"> · <a href="#" rel="noopener noreferrer">ambient music</a></span>
-    -->
+    <span>© <span id="credits-year"></span> David Carvajal Garrido</span>
+    <span class="credits__sep" aria-hidden="true"> · </span>
+    <span class="credits__audio">music:
+      <a
+        href="https://freesound.org/s/746451/"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="Sakura (Cherry Blossoms) by GregorQuendel — CC BY-NC 4.0"
+      >GregorQuendel</a>
+      <span class="credits__license">(CC BY-NC 4.0)</span>
+    </span>
   </footer>
 
   <!-- Atropos.js (CDN) — must be loaded before main.js -->

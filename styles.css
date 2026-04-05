@@ -219,7 +219,7 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 10;
-  white-space: nowrap;
+  max-width: 92vw;
   text-align: center;
   font-family: var(--font-serif);
   font-size: clamp(0.55rem, 1vw, 0.65rem);
@@ -228,6 +228,16 @@ body {
   color: rgba(154, 136, 120, 0.50);
   user-select: none;
   pointer-events: none;
+  line-height: 1.7;
+}
+
+.credits__sep {
+  /* purely decorative — hidden on very narrow screens to allow wrapping */
+  display: inline;
+}
+
+.credits__license {
+  opacity: 0.75;
 }
 
 .credits a {
@@ -240,6 +250,16 @@ body {
 
 .credits a:hover {
   opacity: 0.8;
+}
+
+@media (max-width: 420px) {
+  .credits__sep {
+    display: none;
+  }
+
+  .credits__audio {
+    display: block;
+  }
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */

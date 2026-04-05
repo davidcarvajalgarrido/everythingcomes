@@ -300,6 +300,36 @@ const btnAudio     = document.getElementById('btn-audio');
 const ambientAudio = document.getElementById('ambient-audio');
 let audioPlaying   = false;
 
+// Comfortable atmospheric level — present but never intrusive.
+const AUDIO_TARGET_VOLUME = 0.35;
+// Duration (ms) of the volume ramp on play/pause for a gentle transition.
+const AUDIO_FADE_MS = 1200;
+
+let audioFadeInterval = null;
+
+/** Smoothly ramp audio volume toward `target` over AUDIO_FADE_MS. */
+function fadeVolume(target) {
+  if (audioFadeInterval) clearInterval(audioFadeInterval);
+
+  const start     = ambientAudio.volume;
+  const delta     = target - start;
+  const steps     = 30;
+  const stepMs    = AUDIO_FADE_MS / steps;
+  const stepDelta = delta / steps;
+  let   count     = 0;
+
+  audioFadeInterval = setInterval(() => {
+    count++;
+    ambientAudio.volume = Math.min(1, Math.max(0, start + stepDelta * count));
+    if (count >= steps) {
+      clearInterval(audioFadeInterval);
+      audioFadeInterval = null;
+      // Pause after fade-out completes so the track position is preserved.
+      if (target === 0) ambientAudio.pause();
+    }
+  }, stepMs);
+}
+
 function updateAudioIcon() {
   btnAudio.setAttribute(
     'aria-label',
@@ -310,17 +340,22 @@ function updateAudioIcon() {
 }
 
 if (btnAudio && ambientAudio) {
+  // Pre-set volume to zero so the initial fade-in starts from silence.
+  ambientAudio.volume = 0;
+
   btnAudio.addEventListener('click', () => {
     if (audioPlaying) {
-      ambientAudio.pause();
       audioPlaying = false;
       updateAudioIcon();
+      fadeVolume(0);          // fade out, then pause inside the interval
     } else {
+      ambientAudio.volume = 0;
       ambientAudio.play().then(() => {
         audioPlaying = true;
         updateAudioIcon();
+        fadeVolume(AUDIO_TARGET_VOLUME); // fade up gently after play starts
       }).catch(() => {
-        // No audio source or autoplay blocked — stay in muted state
+        // No audio source or playback blocked — stay in muted state silently.
         audioPlaying = false;
         updateAudioIcon();
       });
