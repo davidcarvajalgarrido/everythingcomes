@@ -12,8 +12,8 @@
   --font-serif: Georgia, 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
 
   /* Fluid type scale */
-  --phrase-size: clamp(2rem, 5.5vw, 4.8rem);
-  --sub-size:    clamp(0.68rem, 1.3vw, 0.875rem);
+  --phrase-size: clamp(1.9rem, 5vw, 5rem);
+  --sub-size:    clamp(0.65rem, 1.2vw, 0.875rem);
 
   /* Transition timing (keep in sync with FADE_OUT / FADE_IN in main.js) */
   --fade-out-dur:  1000ms;  /* exit — slightly quicker so the old phrase doesn't linger too long */
@@ -70,9 +70,10 @@ body {
 /*
   Atropos positions its inner div absolutely (inset: 0), so the
   root element MUST carry explicit dimensions.
+  Wider adaptive width gives longer translations room to breathe.
 */
 #hero-atropos {
-  width:  min(640px, 92vw);
+  width:  min(820px, 92vw);
   height: clamp(220px, 38vh, 340px);
 }
 
@@ -87,7 +88,7 @@ body {
   gap: 1.5rem;
   padding:
     clamp(1.5rem, 4vw, 3rem)
-    clamp(2rem,   7vw, 5.5rem);
+    clamp(1.75rem, 5vw, 4.5rem);
   text-align: center;
 
   /* Semi-transparent so petals remain visible around the card */
@@ -160,6 +161,87 @@ body {
   user-select: none;
 }
 
+/* ── Page controls (top-right) ───────────────────────────────── */
+.controls {
+  position: fixed;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 10;
+  display: flex;
+  gap: 0.45rem;
+}
+
+.controls__btn {
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(247, 243, 238, 0.70);
+  border: 1px solid rgba(154, 136, 120, 0.20);
+  border-radius: 50%;
+  cursor: pointer;
+  color: var(--color-muted);
+  padding: 0;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transition:
+    background 0.25s ease,
+    color      0.25s ease,
+    opacity    0.25s ease;
+}
+
+.controls__btn:hover {
+  background: rgba(247, 243, 238, 0.92);
+  color: var(--color-text);
+}
+
+.controls__btn:focus-visible {
+  outline: 2px solid var(--color-muted);
+  outline-offset: 2px;
+}
+
+.controls__btn svg {
+  width: 0.9rem;
+  height: 0.9rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  overflow: visible;
+}
+
+/* ── Credits footer ──────────────────────────────────────────── */
+.credits {
+  position: fixed;
+  bottom: 0.9rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  white-space: nowrap;
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: clamp(0.55rem, 1vw, 0.65rem);
+  letter-spacing: 0.10em;
+  font-style: italic;
+  color: rgba(154, 136, 120, 0.50);
+  user-select: none;
+  pointer-events: none;
+}
+
+.credits a {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
+}
+
+.credits a:hover {
+  opacity: 0.8;
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 480px) {
   .hero__phrase {
@@ -167,6 +249,11 @@ body {
     white-space: normal;
     word-break: break-word;
     hyphens: auto;
+  }
+
+  .controls {
+    top: 0.75rem;
+    right: 0.75rem;
   }
 }
 
@@ -178,5 +265,9 @@ body {
     transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .controls__btn {
+    transition: none;
   }
 }

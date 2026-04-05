@@ -6,6 +6,15 @@
   <meta name="description" content="Todo llega — a contemplative landing page where a single phrase drifts across eighteen languages." />
   <title>Todo llega · Everything comes</title>
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+
+  <!-- Open Graph -->
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="https://www.everythingcomes.com/" />
+  <meta property="og:title"       content="Todo llega · Everything comes" />
+  <meta property="og:description" content="A contemplative page where a single phrase drifts across eighteen languages." />
+
   <!-- Atropos.js base styles (CDN) -->
   <link
     rel="stylesheet"
@@ -17,6 +26,54 @@
 
   <!-- Decorative full-screen canvas for the sakura petal animation -->
   <canvas id="sakura-canvas" aria-hidden="true"></canvas>
+
+  <!-- ── Page controls (top-right) ────────────────────────── -->
+  <div class="controls" role="group" aria-label="Page controls">
+
+    <!-- Audio toggle — off by default, no autoplay -->
+    <button
+      class="controls__btn"
+      id="btn-audio"
+      aria-label="Play ambient audio"
+      title="Toggle ambient audio"
+    >
+      <!-- Muted state (default) -->
+      <svg class="icon-audio-off" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <path d="M5 8H3v4h2l4 3V5L5 8z"/>
+        <line x1="13" y1="8" x2="17" y2="12"/>
+        <line x1="17" y1="8" x2="13" y2="12"/>
+      </svg>
+      <!-- Playing state -->
+      <svg class="icon-audio-on" viewBox="0 0 20 20" aria-hidden="true" focusable="false" hidden>
+        <path d="M5 8H3v4h2l4 3V5L5 8z"/>
+        <path d="M13.5 8.5a2.5 2.5 0 0 1 0 3"/>
+        <path d="M15.5 6.5a5 5 0 0 1 0 7"/>
+      </svg>
+    </button>
+
+    <!-- Fullscreen toggle -->
+    <button
+      class="controls__btn"
+      id="btn-fullscreen"
+      aria-label="Enter fullscreen"
+      title="Toggle fullscreen"
+    >
+      <!-- Enter fullscreen -->
+      <svg class="icon-fs-enter" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+        <path d="M3 8V3h5M17 8V3h-5M3 12v5h5M17 12v5h-5"/>
+      </svg>
+      <!-- Exit fullscreen -->
+      <svg class="icon-fs-exit" viewBox="0 0 20 20" aria-hidden="true" focusable="false" hidden>
+        <path d="M8 3v5H3M12 3v5h5M8 17v-5H3M12 17v-5h5"/>
+      </svg>
+    </button>
+
+  </div>
+
+  <!-- Ambient audio — no autoplay, no controls; src can be replaced later -->
+  <audio id="ambient-audio" loop preload="none">
+    <!-- <source src="audio/ambient.mp3" type="audio/mpeg" /> -->
+  </audio>
 
   <!-- ── Main content ─────────────────────────────────────── -->
   <main class="hero">
@@ -61,6 +118,14 @@
       </div>
     </div>
   </main>
+
+  <!-- ── Credits ───────────────────────────────────────────── -->
+  <footer class="credits" aria-label="Attribution">
+    <span>© <span id="credits-year"></span> David Carvajal Garrido</span><!--
+    Uncomment and update when audio attribution is needed:
+    <span id="credits-audio-attr"> · <a href="#" rel="noopener noreferrer">ambient music</a></span>
+    -->
+  </footer>
 
   <!-- Atropos.js (CDN) — must be loaded before main.js -->
   <script src="https://cdn.jsdelivr.net/npm/atropos@2/atropos.min.js"></script>

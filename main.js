@@ -46,6 +46,21 @@ const phraseEl = document.getElementById('rotating-text');
 let currentIndex = 0;
 
 /**
+ * Scale down font-size if the phrase overflows its container.
+ * Resets to CSS-driven size first so longer phrases can grow back.
+ */
+function fitPhraseText() {
+  phraseEl.style.fontSize = '';
+  const containerW = phraseEl.parentElement.clientWidth;
+  const phraseW    = phraseEl.scrollWidth;
+  if (phraseW > containerW) {
+    const scale  = (containerW / phraseW) * 0.96;
+    const sizePx = parseFloat(getComputedStyle(phraseEl).fontSize);
+    phraseEl.style.fontSize = (sizePx * scale) + 'px';
+  }
+}
+
+/**
  * Transition to `phrase`, then fire `onComplete` when fully visible.
  *
  * The sequence:
@@ -54,9 +69,6 @@ let currentIndex = 0;
  *   3. Add `is-reset` → instant snap to below-centre (transition: none)
  *   4. Remove `is-reset` → CSS ease-out transition: fade in + drift up   (FADE_IN ms)
  *   5. Fire `onComplete`
- *
- * Separate durations for out/in make the exit feel crisp and the
- * entrance feel slow and deliberate — more poetic, less carousel-like.
  */
 function transitionToPhrase(phrase, onComplete) {
   if (prefersReducedMotion) {
@@ -66,6 +78,7 @@ function transitionToPhrase(phrase, onComplete) {
     phrase.dir
       ? phraseEl.setAttribute('dir', phrase.dir)
       : phraseEl.removeAttribute('dir');
+    fitPhraseText();
     if (onComplete) onComplete();
     return;
   }
@@ -91,6 +104,8 @@ function transitionToPhrase(phrase, onComplete) {
     // ④ Remove reset → base ease-out transition animates up into place
     phraseEl.classList.remove('is-reset');
 
+    fitPhraseText();
+
     if (onComplete) setTimeout(onComplete, FADE_IN);
   }, FADE_OUT);
 }
@@ -102,6 +117,10 @@ function showNextPhrase() {
     setTimeout(showNextPhrase, DISPLAY_DURATION);
   });
 }
+
+// Apply initial fit and re-fit on window resize
+fitPhraseText();
+window.addEventListener('resize', fitPhraseText);
 
 // Start the rotation after the initial phrase has been on screen long enough to read
 setTimeout(showNextPhrase, DISPLAY_DURATION);
@@ -123,7 +142,19 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 // Fewer petals for reduced-motion; zero disables the loop entirely.
-const petalCount = prefersReducedMotion ? 0 : 52;
+// 48 balances visual density with acceptable GPU/CPU cost on mobile.
+const petalCount = prefersReducedMotion ? 0 : 48;
+
+// ── Global wind state ─────────────────────────────────────────
+// Two layered sine waves give a slow, organic horizontal drift.
+let windTick = 0;
+
+function globalWindX() {
+  return (
+    Math.sin(windTick * 0.00028) * 0.70 +
+    Math.sin(windTick * 0.00071 + 1.4) * 0.28
+  );
+}
 
 /**
  * Create one petal with randomised physics and appearance.
@@ -131,20 +162,23 @@ const petalCount = prefersReducedMotion ? 0 : 52;
  */
 function createPetal(startY = null) {
   return {
-    x:          Math.random() * canvas.width,
-    y:          startY !== null ? startY : Math.random() * canvas.height,
-    size:       3 + Math.random() * 4.5,           // ellipse half-width (px)
-    speedY:     0.35 + Math.random() * 0.55,       // downward drift per frame
-    speedX:     (Math.random() - 0.5) * 0.4,       // base lateral drift
-    angle:      Math.random() * Math.PI * 2,       // current rotation (radians)
-    rotSpeed:   (Math.random() - 0.5) * 0.025,     // rotation increment per frame
-    wobble:     Math.random() * Math.PI * 2,       // sinusoidal oscillation phase
-    wobbleFreq: 0.012 + Math.random() * 0.010,     // oscillation frequency
-    wobbleAmp:  0.5   + Math.random() * 0.8,       // oscillation amplitude (px)
-    opacity:    0.45  + Math.random() * 0.45,
-    hue:        335   + Math.random() * 15,        // 335–350° pink-rose
-    sat:        45    + Math.random() * 40,        // saturation %
-    lit:        68    + Math.random() * 16,        // lightness %
+    x:           Math.random() * canvas.width,
+    y:           startY !== null ? startY : Math.random() * canvas.height,
+    size:        2.5 + Math.random() * 4.5,            // ellipse half-width (px)
+    elongation:  0.40 + Math.random() * 0.30,          // minor/major ratio — petal eccentricity
+    speedY:      0.28 + Math.random() * 0.50,           // downward drift per frame
+    speedX:      (Math.random() - 0.5) * 0.35,          // base lateral drift
+    windSens:    0.40 + Math.random() * 0.90,           // sensitivity to global wind
+    angle:       Math.random() * Math.PI * 2,           // current rotation (radians)
+    rotSpeed:    (Math.random() - 0.5) * 0.022,         // rotation increment per frame
+    wobble:      Math.random() * Math.PI * 2,           // sinusoidal oscillation phase
+    wobbleFreq:  0.010 + Math.random() * 0.012,         // oscillation frequency
+    wobbleAmp:   0.40  + Math.random() * 0.90,          // oscillation amplitude (px)
+    opacity:     0.40  + Math.random() * 0.45,
+    opacityOsc:  Math.random() * Math.PI * 2,           // phase for subtle opacity breathing
+    hue:         330   + Math.random() * 20,            // 330–350° blush-pink
+    sat:         35    + Math.random() * 45,            // saturation %
+    lit:         72    + Math.random() * 18,            // lightness %
   };
 }
 
@@ -153,7 +187,7 @@ const petals = Array.from({ length: petalCount }, () => createPetal());
 
 /**
  * Draw a single petal as a slightly eccentric, rotated ellipse.
- * The eccentricity (0.52 ratio) gives it a leaf-like silhouette.
+ * Per-petal elongation gives each one a distinct leaf-like silhouette.
  */
 function drawPetal(p) {
   ctx.save();
@@ -162,7 +196,7 @@ function drawPetal(p) {
   ctx.globalAlpha = p.opacity;
   ctx.fillStyle   = `hsl(${p.hue}, ${p.sat}%, ${p.lit}%)`;
   ctx.beginPath();
-  ctx.ellipse(0, 0, p.size, p.size * 0.52, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 0, p.size, p.size * p.elongation, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
@@ -171,12 +205,23 @@ function drawPetal(p) {
 function animatePetals() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  windTick++;
+  const wind = globalWindX();
+
   for (const p of petals) {
-    // Apply wind-like sinusoidal oscillation to horizontal drift
-    p.wobble += p.wobbleFreq;
-    p.x      += p.speedX + Math.sin(p.wobble) * p.wobbleAmp;
-    p.y      += p.speedY;
-    p.angle  += p.rotSpeed;
+    // Sinusoidal sway + global wind influence
+    p.wobble     += p.wobbleFreq;
+    p.opacityOsc += 0.008;
+    p.x          += p.speedX + wind * p.windSens + Math.sin(p.wobble) * p.wobbleAmp;
+    p.y          += p.speedY;
+    p.angle      += p.rotSpeed;
+
+    // Subtle opacity breathing — petals fade very slightly in and out
+    // Bounds keep petals visible (≥0.25) without becoming too opaque (≤0.88).
+    // 0.003 is the per-frame breath amplitude — barely perceptible individually.
+    p.opacity = Math.max(0.25, Math.min(0.88,
+      p.opacity + Math.sin(p.opacityOsc) * 0.003
+    ));
 
     // Wrap horizontally so petals re-enter from the opposite edge
     if      (p.x < -20)               p.x = canvas.width  + 15;
@@ -184,7 +229,7 @@ function animatePetals() {
 
     // Recycle petals that have fallen below the viewport
     if (p.y > canvas.height + 15) {
-      Object.assign(p, createPetal(-Math.random() * 50));
+      Object.assign(p, createPetal(-Math.random() * 60));
     }
 
     drawPetal(p);
@@ -216,3 +261,77 @@ if (typeof Atropos !== 'undefined') {
     highlight:    false,   // no specular highlight sheen
   });
 }
+
+// ─────────────────────────────────────────────────────────────
+// FULLSCREEN TOGGLE
+// ─────────────────────────────────────────────────────────────
+
+const btnFullscreen = document.getElementById('btn-fullscreen');
+
+function updateFullscreenIcon() {
+  const isFs = !!document.fullscreenElement;
+  btnFullscreen.setAttribute('aria-label', isFs ? 'Exit fullscreen' : 'Enter fullscreen');
+  btnFullscreen.querySelector('.icon-fs-enter').hidden = isFs;
+  btnFullscreen.querySelector('.icon-fs-exit').hidden  = !isFs;
+}
+
+if (btnFullscreen) {
+  if (!document.fullscreenEnabled) {
+    // Graceful fallback — hide button if API unavailable
+    btnFullscreen.hidden = true;
+  } else {
+    btnFullscreen.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    });
+    document.addEventListener('fullscreenchange', updateFullscreenIcon);
+    updateFullscreenIcon();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// AUDIO TOGGLE
+// ─────────────────────────────────────────────────────────────
+
+const btnAudio     = document.getElementById('btn-audio');
+const ambientAudio = document.getElementById('ambient-audio');
+let audioPlaying   = false;
+
+function updateAudioIcon() {
+  btnAudio.setAttribute(
+    'aria-label',
+    audioPlaying ? 'Mute ambient audio' : 'Play ambient audio'
+  );
+  btnAudio.querySelector('.icon-audio-off').hidden = audioPlaying;
+  btnAudio.querySelector('.icon-audio-on').hidden  = !audioPlaying;
+}
+
+if (btnAudio && ambientAudio) {
+  btnAudio.addEventListener('click', () => {
+    if (audioPlaying) {
+      ambientAudio.pause();
+      audioPlaying = false;
+      updateAudioIcon();
+    } else {
+      ambientAudio.play().then(() => {
+        audioPlaying = true;
+        updateAudioIcon();
+      }).catch(() => {
+        // No audio source or autoplay blocked — stay in muted state
+        audioPlaying = false;
+        updateAudioIcon();
+      });
+    }
+  });
+  updateAudioIcon();
+}
+
+// ─────────────────────────────────────────────────────────────
+// CREDITS — current year
+// ─────────────────────────────────────────────────────────────
+
+const yearEl = document.getElementById('credits-year');
+if (yearEl) yearEl.textContent = new Date().getFullYear();
