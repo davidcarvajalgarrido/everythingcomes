@@ -1,0 +1,182 @@
+/* ============================================================
+   styles.css — Todo llega · Everything comes
+   ============================================================ */
+
+/* ── Custom properties ──────────────────────────────────────── */
+:root {
+  --color-bg:    #f7f3ee;   /* warm off-white, like washi paper  */
+  --color-text:  #1a1510;   /* warm near-black                   */
+  --color-muted: #9a8878;   /* soft rose-brown for the subtitle  */
+
+  /* Serif stack — no external font dependency */
+  --font-serif: Georgia, 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+
+  /* Fluid type scale */
+  --phrase-size: clamp(2rem, 5.5vw, 4.8rem);
+  --sub-size:    clamp(0.68rem, 1.3vw, 0.875rem);
+
+  /* Transition timing (keep in sync with FADE_OUT / FADE_IN in main.js) */
+  --fade-out-dur:  1000ms;  /* exit — slightly quicker so the old phrase doesn't linger too long */
+  --fade-in-dur:   1400ms;  /* entrance — slow, deliberate, the phrase settles into place        */
+  --ease-in:   cubic-bezier(0.4,  0,    1,   1);    /* accelerates away — departure  */
+  --ease-out:  cubic-bezier(0,    0,    0.2, 1);    /* decelerates in   — arrival    */
+}
+
+/* ── Reset ───────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Base ────────────────────────────────────────────────────── */
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-serif);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Background canvas ──────────────────────────────────────── */
+#sakura-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* events pass through to the card below */
+  z-index: 0;
+}
+
+/* ── Hero wrapper ────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100vh;       /* fallback */
+  height: 100dvh;      /* accounts for mobile browser chrome  */
+}
+
+/* ── Atropos container ───────────────────────────────────────── */
+/*
+  Atropos positions its inner div absolutely (inset: 0), so the
+  root element MUST carry explicit dimensions.
+*/
+#hero-atropos {
+  width:  min(640px, 92vw);
+  height: clamp(220px, 38vh, 340px);
+}
+
+/* ── Card surface (lives inside .atropos-inner) ──────────────── */
+.hero__card {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding:
+    clamp(1.5rem, 4vw, 3rem)
+    clamp(2rem,   7vw, 5.5rem);
+  text-align: center;
+
+  /* Semi-transparent so petals remain visible around the card */
+  background: rgba(247, 243, 238, 0.80);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+
+  border-radius: 3px;
+  border: 1px solid rgba(154, 136, 120, 0.14);
+}
+
+/* ── Text container ──────────────────────────────────────────── */
+.hero__text-container {
+  /* Fixed full-width centre-align prevents any horizontal shift when
+     a phrase changes length or switches to an RTL script (Arabic, Hebrew). */
+  width: 100%;
+  text-align: center;
+  /* Small vertical padding absorbs the translateY shift during transition */
+  overflow: hidden;
+  padding: 0.4em 0;
+}
+
+/* ── Rotating phrase ─────────────────────────────────────────── */
+.hero__phrase {
+  font-size: var(--phrase-size);
+  font-weight: 400;
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  color: var(--color-text);
+
+  /* Visible, centred default state */
+  opacity: 1;
+  transform: translateY(0);
+
+  /* Fade-in / entrance: slow deceleration — phrase settles gently */
+  transition:
+    opacity   var(--fade-in-dur) var(--ease-out),
+    transform var(--fade-in-dur) var(--ease-out);
+
+  will-change: opacity, transform;
+}
+
+/* ① Leaving — fade out and drift upward.
+   Override transition so the exit uses a tighter ease-in curve. */
+.hero__phrase.is-out {
+  opacity: 0;
+  transform: translateY(-0.25em);
+  transition:
+    opacity   var(--fade-out-dur) var(--ease-in),
+    transform var(--fade-out-dur) var(--ease-in);
+}
+
+/*
+  ② Reset — instantly position the new text below centre so it
+  can drift upward into place.  `transition: none` makes this
+  state snap in with zero animation.
+*/
+.hero__phrase.is-reset {
+  opacity: 0;
+  transform: translateY(0.25em);
+  transition: none;
+}
+
+/* ── Subtitle ────────────────────────────────────────────────── */
+.hero__subtext {
+  font-size: var(--sub-size);
+  letter-spacing: 0.28em;
+  color: var(--color-muted);
+  font-style: italic;
+  user-select: none;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .hero__phrase {
+    /* Allow long phrases (e.g. Polish) to wrap gracefully */
+    white-space: normal;
+    word-break: break-word;
+    hyphens: auto;
+  }
+}
+
+/* ── Reduced-motion override ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .hero__phrase,
+  .hero__phrase.is-out,
+  .hero__phrase.is-reset {
+    transition: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

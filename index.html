@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Todo llega — a contemplative landing page where a single phrase drifts across eighteen languages." />
+  <title>Todo llega · Everything comes</title>
+
+  <!-- Atropos.js base styles (CDN) -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/atropos@2/atropos.min.css"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Decorative full-screen canvas for the sakura petal animation -->
+  <canvas id="sakura-canvas" aria-hidden="true"></canvas>
+
+  <!-- ── Main content ─────────────────────────────────────── -->
+  <main class="hero">
+    <!--
+      Atropos.js requires this exact four-level div structure.
+      The inner `.atropos-inner` fills the wrapper absolutely,
+      so the wrapper (#hero-atropos) carries the explicit dimensions.
+
+      Elements with data-atropos-offset receive layered depth
+      on hover — positive values come towards the viewer.
+    -->
+    <div class="atropos" id="hero-atropos">
+      <div class="atropos-scale">
+        <div class="atropos-rotate">
+          <div class="atropos-inner hero__card">
+
+            <!--
+              aria-live="polite" + aria-atomic="true":
+              screen readers announce the full phrase each time it changes.
+            -->
+            <div
+              class="hero__text-container"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <p
+                id="rotating-text"
+                class="hero__phrase"
+                lang="es"
+                data-atropos-offset="4"
+              >Todo llega</p>
+            </div>
+
+            <p
+              class="hero__subtext"
+              aria-label="Everything comes"
+              data-atropos-offset="1.5"
+            >· everything comes ·</p>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Atropos.js (CDN) — must be loaded before main.js -->
+  <script src="https://cdn.jsdelivr.net/npm/atropos@2/atropos.min.js"></script>
+  <script src="main.js"></script>
+
+</body>
+</html>
