@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WhatsApp Group Sender</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <main class="container">
+    <h1>WhatsApp Group Sender</h1>
+
+    <!-- Message input -->
+    <section class="section">
+      <label for="message" class="label">Message</label>
+      <textarea
+        id="message"
+        class="textarea"
+        placeholder="Paste your message here..."
+        rows="6"
+      ></textarea>
+    </section>
+
+    <!-- Groups list -->
+    <section class="section">
+      <label class="label">Groups</label>
+
+      <div class="add-group">
+        <input
+          type="text"
+          id="group-input"
+          class="input"
+          placeholder="Group name"
+          aria-label="New group name"
+        />
+        <button id="btn-add-group" class="btn btn--secondary">Add</button>
+      </div>
+
+      <ul id="group-list" class="group-list" aria-label="Groups"></ul>
+    </section>
+
+    <!-- Controls -->
+    <section class="section controls">
+      <button id="btn-start" class="btn btn--primary">Start sending</button>
+      <button id="btn-next" class="btn btn--primary" disabled>Next group</button>
+      <button id="btn-copy" class="btn btn--secondary">Copy message</button>
+    </section>
+
+    <!-- Status display -->
+    <section id="status" class="status" aria-live="polite" aria-atomic="true" hidden>
+      <span id="status-counter" class="status__counter"></span>
+      <span id="status-group" class="status__group"></span>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
